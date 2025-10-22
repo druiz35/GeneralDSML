@@ -1,4 +1,5 @@
 import numpy as np
+
 """
 Esta es mi primera red neuronal.
 Utiliza un algoritmo ampliamente utilizado en clasificación binaria,
@@ -37,8 +38,11 @@ ACTUALIZACIONES DE PARÁMETROS Y DE BASE
     b := b - & * db
         &: Learning Rate
 """
+
+
 def sigmoid(z):
-    return 1/(1 + np.exp(-z))
+    return 1 / (1 + np.exp(-z))
+
 
 def propagate(w, b, X_train, Y_train):
     # Training samples quantity
@@ -48,28 +52,31 @@ def propagate(w, b, X_train, Y_train):
     # Activation Function
     A = sigmoid(z)
     # Loss Function and Cost Function for later optimization for the learning process
-    loss = -Y_train*np.log(A) - (1-Y_train)*np.log(1-A)
-    cost = 1/m*np.sum(loss)
+    loss = -Y_train * np.log(A) - (1 - Y_train) * np.log(1 - A)
+    cost = 1 / m * np.sum(loss)
     # Cost derivatives respect to the weights and bias for gradient descent for optimization
-    dw = 1/m*np.dot(X_train, (A-Y_train).T)
-    db = 1/m*np.sum(A-Y_train)
+    dw = 1 / m * np.dot(X_train, (A - Y_train).T)
+    db = 1 / m * np.sum(A - Y_train)
     # Saving Gradients in a Dictionary for Returning
     grads = {"dw": dw, "db": db}
     # Return Gradients Dictionary and Cost for optimization
-    return grads ,cost
+    return grads, cost
+
 
 def optimize(w, b, X_train, Y_train, iterations, l_rate):
     # Cost list accumulator for later model analysis
     costs = []
     # Optimizer Loop.
+    dw = 0
+    db = 0
     for i in range(iterations):
         # Frontpropagation. Returns Grads and Cost for Backpropagation
-        grads, cost = propagate(w,b,X_train,Y_train)
-        dw = grads['dw']
-        db = grads['db']
+        grads, cost = propagate(w, b, X_train, Y_train)
+        dw = grads["dw"]
+        db = grads["db"]
         # Backpropagation. Updating weights and bias.
-        w -= l_rate*dw
-        b -= l_rate*db
+        w -= l_rate * dw
+        b -= l_rate * db
         # Appending cost every 100 iteration
         if i % 100 == 0:
             costs.append(cost)
@@ -80,11 +87,12 @@ def optimize(w, b, X_train, Y_train, iterations, l_rate):
     # Returns params for predictions, grads and costs for later model analysis.
     return params, grads, costs
 
+
 def predict(w, b, X_input):
     # Input Samples Quantity
     m = X_input.shape[1]
     # Predictions Accumulator Vector
-    Y_prediction = np.zeros((1,m))
+    Y_prediction = np.zeros((1, m))
     # Reshaping trained weights vector for the Z linear function
     w = w.reshape(X_input.shape[0], 1)
     # Calculating Z linear function for Activation Function
@@ -104,28 +112,31 @@ def predict(w, b, X_input):
     # Return predictions vector Y_prediction
     return Y_prediction
 
+
 def model(X_train, Y_train, X_test, Y_test, iterations, l_rate):
     # Training weights and bias with Training Set
     # START
     w, b = np.zeros((X_train.shape[0], 1)), 0
-    params, grads, costs = optimize(w,b,X_train,Y_train,iterations,l_rate)
-    w,b = params["w"], params["b"]
+    params, grads, costs = optimize(w, b, X_train, Y_train, iterations, l_rate)
+    w, b = params["w"], params["b"]
     # END
 
     # Predicting on training set
-    Y_prediction_train = predict(w,b,X_train)
+    Y_prediction_train = predict(w, b, X_train)
 
     # Predicting on test set
-    Y_prediction_test = predict(w,b,X_test)
+    Y_prediction_test = predict(w, b, X_test)
 
     # Predictions indicators (accuracy, costs, bias, weights)
-    print("train accuracy: {} %".format(100 - np.mean(np.abs(Y_prediction_train - Y_train)) * 100))
-    print("test accuracy: {} %".format(100 - np.mean(np.abs(Y_prediction_test - Y_test)) * 100))
-    d = {"costs": costs,
-         "Y_prediction_test": Y_prediction_test,
-         "Y_prediction_train" : Y_prediction_train,
-         "w" : w,
-         "b" : b,
-         "learning_rate" : l_rate,
-         "num_iterations": iterations}
+    print(f"train accuracy: {100 - np.mean(np.abs(Y_prediction_train - Y_train)) * 100} %")
+    print(f"test accuracy: {100 - np.mean(np.abs(Y_prediction_test - Y_test)) * 100} %")
+    d = {
+        "costs": costs,
+        "Y_prediction_test": Y_prediction_test,
+        "Y_prediction_train": Y_prediction_train,
+        "w": w,
+        "b": b,
+        "learning_rate": l_rate,
+        "num_iterations": iterations,
+    }
     return d
