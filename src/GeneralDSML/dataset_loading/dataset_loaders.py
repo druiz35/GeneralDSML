@@ -1,17 +1,28 @@
-import pandas as pd
 from datasets import load_dataset
-from sklearn.datasets import load_svmlight_file
+import pandas as pd
+# from sklearn.datasets import load_svmlight_file
 
 
 class TabularDataset:
-    def load_from_csv(self, path):
-        self.dataset = pd.read_csv(path)
+    def __init__(self, path: str):
+        self.path = path
 
-    def load_from_excel(self, path):
-        self.dataset = pd.read_excel(path)
+    def load_from_file_extension(self) -> None:
+        if ".csv" in self.path:
+            self.load_from_csv()
+        elif ".xlsx" in self.path:
+            self.load_from_excel()
+        elif ".json" in self.path:
+            self.load_from_json()
 
-    def load_from_json(self, path):
-        self.dataset = pd.read_json(path)
+    def load_from_csv(self) -> None:
+        self.dataset = pd.read_csv(self.path)
+
+    def load_from_excel(self) -> None:
+        self.dataset = pd.read_excel(self.path)
+
+    def load_from_json(self) -> None:
+        self.dataset = pd.read_json(self.path)
 
 
 class ImageDataset:
@@ -19,5 +30,8 @@ class ImageDataset:
 
 
 class TextDataset:
+    def __init__(self, path):
+        self.path = path
+
     def load_with_huggingface(self, path):
         self.dataset = load_dataset("text", data_files=path)
