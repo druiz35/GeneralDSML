@@ -1,27 +1,57 @@
 import pandas as pd
-import numpy as np
-from descriptive_analysis.structural_analysis import TabularStructuralAnalysis
 from dataset_loading.dataset_loaders import TabularDataset
+from descriptive_analysis.structural_analysis import TabularStructuralAnalysis
+from GeneralDSML.reports.tabular_reports import TabularDataReport, NumericalColumnReport
 
 
 class TabularNumericalAnalysis:
-    def __init__(self, tabular_dataset: TabularDataset, structural_analysis: TabularStructuralAnalysis):
+    def __init__(
+        self, tabular_dataset: TabularDataset, structural_analysis: TabularStructuralAnalysis, report: TabularDataReport
+    ):
         self.dataset = tabular_dataset.dataset
         self.structural_analysis = structural_analysis
+        self.report = report
 
-    def get_numerical_summary(self):
-        """Returns a summary of numerical features in the dataset."""
-        numerical_features = self.dataset.select_dtypes(include=[np.number])
-        summary = numerical_features.describe().transpose()
-        return summary
+    def set_numerical_summary(self) -> None:
+        numerical_cols = self.structural_analysis.report.numerical_columns.keys()
+        numerical_summary = self.dataset[numerical_cols].describe().transpose()
+        for col in numerical_cols:
+            col_report = NumericalColumnReport(
+                mean=numerical_summary.loc[col, "mean"],
+                median=numerical_summary.loc[col, "50%"],
+                std=numerical_summary.loc[col, "std"],
+                min=numerical_summary.loc[col, "min"],
+                per25=numerical_summary.loc[col, "25%"],
+                per75=numerical_summary.loc[col, "75%"],
+                max=numerical_summary.loc[col, "max"],
+                skewness=0,  # TODO: Implement skewness calculation
+                kurtosis=0,  # TODO: Implement kurtosis calculation
+                zeros_count=0,  # TODO: Implement zeros_count
+                rows_with_zeros=list(),  # TODO: Implement rows_with_zeros
+            )
+            self.report.numerical_columns[col] = col_report
+
+    def analyze(self) -> TabularDataReport:
+        # Get summary statistics
+        self.set_numerical_summary()
+
+        # Generate graphs
+        # TODO: ...
+
+        # Statistical distributions tests
+        # TODO: ...
+
+        # Outlier detection
+        # TODO: ...
+
+        return self.report
 
 
-class NumericalOutlierAnalysis:
-    def IQR_outlier_detector(self, structural_analysis, df):
-        cols = structural_analysis.report["columns_info"]["numeric_columns"]
-        accum = dict((col, []) for col in cols)
+class NumericalOutlierUtilities:
+    def IQR_outlier_detector(self, numerical_columns: list[str], df: pd.DataFrame):
+        accum = dict((col, []) for col in numerical_columns)
         for index, row in df.iterrows():
-            for col in cols:
+            for col in numerical_columns:
                 Q1 = df[col].quantile(0.25)
                 Q3 = df[col].quantile(0.75)
                 IQR = Q3 - Q1

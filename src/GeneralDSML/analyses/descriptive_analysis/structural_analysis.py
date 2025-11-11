@@ -2,11 +2,13 @@ import pandas as pd
 import json
 from typing import Any, Dict, List
 from GeneralDSML.dataset_loading.dataset_loaders import TabularDataset
-from GeneralDSML.reports.tabular_reports import (TabularDataReport, 
-                                                 NumericalColumnReport, 
-                                                 CategoricalColumnReport, 
-                                                 TextColumnReport, 
-                                                 DatetimeColumnReport)
+from GeneralDSML.reports.tabular_reports import (
+    TabularDataReport,
+    NumericalColumnReport,
+    CategoricalColumnReport,
+    TextColumnReport,
+    DatetimeColumnReport,
+)
 from datetime import datetime
 
 
@@ -28,8 +30,8 @@ class TabularStructuralAnalysis:
     def get_nulls_per_column(self, col: str) -> int:
         return self.dataset[col].isnull().sum().sum()
 
-    def get_rows_with_nulls_in_col(self, col) -> List[List[Any]]:
-        return self.dataset[self.dataset[col].isnull()].values.tolist() 
+    def get_rows_with_nulls_in_col(self, col: str) -> List[List[Any]]:
+        return self.dataset[self.dataset[col].isnull()].values.tolist()
 
     """
     def infer_implicit_dtype(self, col):
@@ -44,7 +46,7 @@ class TabularStructuralAnalysis:
             json.dump(self.report, f, indent=4)
         return f"Report saved to {report_name}.json"
 
-    def generate_report(self, report_name: str | None = None) -> str:
+    def analyze(self, report_name: str | None = None) -> TabularDataReport:
         # Get rows and columns
         self.set_rows_and_columns()
 
@@ -60,37 +62,43 @@ class TabularStructuralAnalysis:
         # Go over each column gathering relevant structural information
         for col in self.dataset.columns:
             detected_type = self.get_column_type(col)
-            if detected_type.startswith("float") or str(self.get_column_type(col)).startswith("int"): 
+            missing_count = self.get_nulls_per_column(col)
+            if self.report.n_rows:
+                missing_pct = (self.get_nulls_per_column(col) / self.report.n_rows) * 100
+            else:
+                missing_pct = None
+            implicit_dtype = ""
+            rows_with_null = self.get_rows_with_nulls_in_col(col)
+            if detected_type.startswith("float") or str(self.get_column_type(col)).startswith("int"):
                 self.report.numerical_columns[col] = NumericalColumnReport(
                     name=col,
-                    missing_count=self.get_nulls_per_column(col),
-                    missing_pct=(self.get_nulls_per_column(col) / self.report.n_rows) * 100,
-                    implicit_dtype="", # TODO: self.infer_implicit_dtype(col)
-                    rows_with_nulls=self.get_rows_with_nulls_in_col(col),
+                    missing_count=missing_count,
+                    missing_pct=missing_pct,
+                    implicit_dtype=implicit_dtype,  # TODO: self.infer_implicit_dtype(col)
+                    rows_with_nulls=rows_with_null,
                 )
             elif detected_type.startswith("object"):
                 self.report.categorical_columns[col] = CategoricalColumnReport(
                     name=col,
-                    missing_count=self.get_nulls_per_column(col),
-                    missing_pct=(self.get_nulls_per_column(col) / self.report.n_rows) * 100,
-                    implicit_dtype="", # TODO: self.infer_implicit_dtype(col)
-                    rows_with_nulls=self.get_rows_with_nulls_in_col(col),
+                    missing_count=missing_count,
+                    missing_pct=missing_pct,
+                    implicit_dtype=implicit_dtype,  # TODO: self.infer_implicit_dtype(col)
+                    rows_with_nulls=rows_with_null,
                 )
             elif detected_type.startswith("datetime"):
                 self.report.datetime_columns[col] = DatetimeColumnReport(
                     name=col,
-                    missing_count=self.get_nulls_per_column(col),
-                    missing_pct=(self.get_nulls_per_column(col) / self.report.n_rows) * 100,
-                    implicit_dtype="", # TODO: self.infer_implicit_dtype(col)
-                    rows_with_nulls=self.get_rows_with_nulls_in_col(col),
+                    missing_count=missing_count,
+                    missing_pct=missing_pct,
+                    implicit_dtype=implicit_dtype,  # TODO: self.infer_implicit_dtype(col)
+                    rows_with_nulls=rows_with_null,
                 )
             else:
                 self.report.text_columns[col] = TextColumnReport(
                     name=col,
-                    missing_count=self.get_nulls_per_column(col),
-                    missing_pct=(self.get_nulls_per_column(col) / self.report.n_rows) * 100,
-                    implicit_dtype="", # TODO: self.infer_implicit_dtype(col)
-                    rows_with_nulls=self.get_rows_with_nulls_in_col(col),
+                    missing_count=missing_count,
+                    missing_pct=missing_pct,
+                    implicit_dtype=implicit_dtype,  # TODO: self.infer_implicit_dtype(col)
+                    rows_with_nulls=rows_with_null,
                 )
         return self.report
-        
