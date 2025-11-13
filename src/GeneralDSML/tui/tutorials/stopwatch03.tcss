@@ -1,0 +1,57 @@
+/*
+Assigns styles to the Stopwatch class.
+Works similar for the other classes.
+*/
+Stopwatch {
+    background: $boost; /*Sets background color. $ is predefined.*/
+    height: 5;  /*Line height, meassured in lines.*/
+    margin: 1;  /* Typical css margin, meassured in cells.*/
+    min-width: 50;  /*Minimum width, meassured in cells.*/
+    padding: 1;   /*Typical css padding, meassured in cells.*/
+}
+
+TimeDisplay {
+    text-align: center;   /*Typical css text-align.*/
+    color: $foreground-muted;   /*Typical css color.*/
+    height: 3;
+}
+
+Button {
+    width: 16;    /*Typical css width, meassured in cells.*/
+}
+
+/*IDs works the same as in css.*/
+#start {
+    dock: left;   /*Aligns the item to a given edge.*/
+}
+
+#stop {
+    dock: left;
+    display: none;    /*Typical css display. In hiis case, tells Textual to not show the button.*/
+}
+
+#reset {
+    dock: right;
+}
+
+/*STARTED state dynamic css styles*/
+.started {
+    background: $success-muted;
+    color: $text;
+}
+
+.started TimeDisplay {
+    color: $foreground;
+}
+
+.started #start {
+    display: none;
+}
+
+.started #stop {
+    display: block;
+}
+
+.started #reset {
+    visibility: hidden;
+}
