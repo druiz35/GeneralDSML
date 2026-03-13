@@ -1,10 +1,7 @@
-"""
-Scratch implementations of stochastic gradient descent.
-"""
-
 import numpy as np
 
 
+# STOCHASTIC GRADIENT DESCENT
 class SimpleStochasticGradientDescentFromScratch:
     def __init__(self, X, y_train, model, learning_rate):
         self.X = X
