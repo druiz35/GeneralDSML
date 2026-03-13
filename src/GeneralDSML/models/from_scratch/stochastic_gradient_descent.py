@@ -5,46 +5,42 @@ Scratch implementations of stochastic gradient descent.
 import numpy as np
 
 
-class SimpleStochasticGradientDescent:
-    def __init__(self, X, y_train, linearization, activation, loss, loss_dw, loss_db, cost, learning_rate):
+class SimpleStochasticGradientDescentFromScratch:
+    def __init__(self, X, y_train, model, learning_rate):
         self.X = X
         self.y_train = y_train
-        self.linearization = linearization
-        self.activation = activation
-        self.loss = loss
-        self.loss_dw = loss_dw
-        self.loss_db = loss_db
-        self.cost = cost
+        self.linearization = model.linearization
+        self.activation = model.activation
+        self.loss = model.loss
+        self.loss_dw = model.loss_dw
+        self.loss_db = model.loss_db
+        self.cost = model.cost
         self.learning_rate = learning_rate
-        self.w = np.zeros((X.shape[0], 1))
-        self.b = 0
-
-    def dw(self, X_len, A):
-        return 1 / X_len * np.dot(self.X, (A - self.y_train).T)
 
     def forward_propagation(self):
-        z = self.linearization(self.w, self.X, self.b)
-        A = self.activation(z)
-        return A
+        z = self.linearization(self.X)
+        y_hat = self.activation(z)
+        return y_hat
 
-    def backward_propagation(self, A):
+    def backward_propagation(self, y_hat):
         # Update weights
         m = self.X.shape[1]
-        calculated_loss = self.loss(A, self.y_train)
+        calculated_loss = self.loss(y_hat, self.y_train)
         calculated_cost = self.cost(calculated_loss, m)
-        dw = 1 / m * self.loss_dw(self.X, self.y_train, A)
-        db = 1 / m * self.loss_db(self.X, self.y_train, A)
+        dw = 1 / m * self.loss_dw(self.X, self.y_train, y_hat)
+        db = 1 / m * self.loss_db(self.X, self.y_train, y_hat)
         grads = {"dw": dw, "db": db}
-        self.w -= self.learning_rate * dw
-        self.b -= self.learning_rate * db
+        self.model.w -= self.learning_rate * dw
+        self.model.b -= self.learning_rate * db
         return grads, calculated_cost
-
-    def update_weights(self, pred, X):
-        self.w = self.w + self.learning_rate * self.loss(self.y_train, pred) * X
 
     def run(self, iterations):
         # Cost accumulator
         costs = []
+
+        # Initiaalize parameters
+        self.model.initialize_parameters(dim=self.X.shape[0])
+
         # Optimizer loop
         for i in range(iterations):
             # forward_propagation
@@ -52,5 +48,5 @@ class SimpleStochasticGradientDescent:
             _, calculated_cost = self.backward_propagation(A)
             if i % 100 == 0:
                 costs.append(calculated_cost)
-        params = {"w": self.w, "b": self.b}
+        params = {"w": self.model.w, "b": self.model.b}
         return params, costs
