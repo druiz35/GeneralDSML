@@ -8,6 +8,11 @@ import numpy as np
 def sigmoid(z):
     return 1 / (1 + np.exp(-z))
 
+def tanh(z):
+    return (np.exp(z) - np.exp(-z))/(np.exp(z) + np.exp(-z))
 
-def linearization(w, X_train, b):
-    return np.dot(w.T, X_train) + b
+def relu(z):
+    return np.max(0, z)
+
+def leaky_relu(leak=0.01, z):
+    return np.max(leak*z, z)
